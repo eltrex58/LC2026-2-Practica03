@@ -32,12 +32,43 @@ FORMAS NORMALES
 
 --Ejercicio 1
 fnn :: Prop -> Prop
-fnn = undefined
+fnn (Cons True) = Cons True 
+fnn (Cons False) = Cons False
+fnn (Var a) = Var a
+fnn (Not a) = negar (fnn a)
+fnn (Impl a b) = Or (Not (fnn a)) (fnn b)
+fnn (Syss a b) = And (fnn (Impl a b)) (fnn (Impl b a))
+fnn (Or a b) = Or (fnn a) (fnn b)
+fnn (And a b) = And (fnn a) (fnn b)
 
+negar :: Prop -> Prop
+negar (Cons True) = Cons False
+negar (Cons False) = Cons True
+negar (Var a) = Not (Var a)
+negar (Not a) = a
+negar (Or a b) = And (negar a) (negar b)
+negar (And a b) = Or (negar a) (negar b)
+negar (Impl a b) = And a (negar b)
+negar (Syss a b) = negar (And (Impl a b) (Impl b a))
 
 --Ejercicio 2
 fnc :: Prop -> Prop
-fnc = undefined
+fnc (Cons True) = Cons True
+fnc (Cons False) = Cons False
+fnc (Var a) = Var a
+fnc (Not a) = dist (fnn a)
+fnc (And a b) = dist (And a b)
+fnc (Or a b) = dist (Or a b)
+fnc (Impl a b) = dist (fnn (Impl a b))
+fnc (Syss a b) = dist (fnn (Syss a b))
+
+
+dist :: Prop -> Prop
+dist (Or (And b c) a) = And (dist (Or b a)) (dist (Or c a))
+dist (Or a (And b c)) = And (dist (Or a b)) (dist (Or a c))
+dist (And a b) = And (dist a) (dist b)
+dist (Or a b) = Or (dist a) (dist b)
+dist p = p
 
 {-
 RESOLUCION BINARIA
@@ -49,12 +80,29 @@ type Clausula = [Literal]
 
 --Ejercicio 1
 clausulas :: Prop -> [Clausula]
-clausulas = undefined
+clausulas (Cons True) = [[Cons True]]
+clausulas (Cons False) = [[Cons False]]
+clausulas (Var a) = [[Var a]]
+clausulas (Not a) = [[Not a]]
+clausulas (Or a b) = [[Or a b]]
+clausulas (And a b) = clausulas a ++ clausulas b
+
+
+
 
 --Ejercicio 2
 resolucion :: Clausula -> Clausula -> Clausula
 resolucion = undefined
 
+{--
+rs :: [Clausula] -> [Clausula]
+rs [] = []
+rs [x] = [x]
+rs (x:(y:xs)) = 
+    if hayResolvente x y 
+        then (x:(y:xs)) ++ [resolucion x y] ++ rs (x:xs) ++ rs (y:xs) 
+        else (x:(y:xs)) ++ rs (x:xs) ++ rs (y:xs) 
+--}
 {-
 ALGORITMO DE SATURACION
 -}
