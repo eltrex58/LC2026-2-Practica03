@@ -6,7 +6,7 @@ data Prop = Var String | Cons Bool | Not Prop
             | Impl Prop Prop | Syss Prop Prop
             deriving (Eq)
 
-instance Show Prop where 
+instance Show Prop where
                     show (Cons True) = "⊤"
                     show (Cons False) = "⊥"
                     show (Var p) = p
@@ -32,7 +32,7 @@ FORMAS NORMALES
 
 --Ejercicio 1
 fnn :: Prop -> Prop
-fnn (Cons True) = Cons True 
+fnn (Cons True) = Cons True
 fnn (Cons False) = Cons False
 fnn (Var a) = Var a
 fnn (Not a) = negar (fnn a)
@@ -84,15 +84,33 @@ clausulas (Cons True) = [[Cons True]]
 clausulas (Cons False) = [[Cons False]]
 clausulas (Var a) = [[Var a]]
 clausulas (Not a) = [[Not a]]
-clausulas (Or a b) = [[Or a b]]
-clausulas (And a b) = clausulas a ++ clausulas b
+clausulas (Or a b) = [a:[b]]
+clausulas (And a b) = union (clausulas a) (clausulas b)
+clausulas _ = [[]]
 
-
+union :: Eq a => [a] -> [a] -> [a]
+union ys [] = ys
+union ys (x:xs)
+    | elem x ys = union ys xs
+    | otherwise      = union (ys ++ [x]) xs
 
 
 --Ejercicio 2
 resolucion :: Clausula -> Clausula -> Clausula
-resolucion = undefined
+resolucion [] _ = []
+resolucion (x:xs) (y:ys) =
+    let r = res x (y:ys)
+    in if null r
+        then x : resolucion xs (y:ys)
+        else r
+
+res :: Literal -> Clausula -> Clausula
+res _ [] = []
+res x (y:ys)
+    | x == negar y = ys
+    | otherwise = res x ys
+
+
 
 {--
 rs :: [Clausula] -> [Clausula]
@@ -109,7 +127,10 @@ ALGORITMO DE SATURACION
 
 --Ejercicio 1
 hayResolvente :: Clausula -> Clausula -> Bool
-hayResolvente = undefined
+hayResolvente [] _ = False
+hayResolvente (x:xs) (y:ys) =
+    let r = res x (y:ys)
+    in (not (null r) || hayResolvente xs (y:ys))
 
 --Ejercicio 2
 --Funcion principal que pasa la formula proposicional a fnc e invoca a res con las clausulas de la formula.
