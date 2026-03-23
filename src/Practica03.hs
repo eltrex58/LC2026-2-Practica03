@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
+{- HLINT ignore "Use camelCase" -}
 module Practica03 where
 
 --Sintaxis de la logica proposicional
@@ -36,7 +38,7 @@ fnn (Cons True) = Cons True
 fnn (Cons False) = Cons False
 fnn (Var a) = Var a
 fnn (Not a) = negar (fnn a)
-fnn (Impl a b) = Or (Not (fnn a)) (fnn b)
+fnn (Impl a b) = Or (fnn (Not a)) (fnn b)
 fnn (Syss a b) = And (fnn (Impl a b)) (fnn (Impl b a))
 fnn (Or a b) = Or (fnn a) (fnn b)
 fnn (And a b) = And (fnn a) (fnn b)
@@ -53,22 +55,22 @@ negar (Syss a b) = negar (And (Impl a b) (Impl b a))
 
 --Ejercicio 2
 fnc :: Prop -> Prop
-fnc (Cons True) = Cons True
-fnc (Cons False) = Cons False
-fnc (Var a) = Var a
-fnc (Not a) = dist (fnn a)
-fnc (And a b) = dist (And a b)
-fnc (Or a b) = dist (Or a b)
-fnc (Impl a b) = dist (fnn (Impl a b))
-fnc (Syss a b) = dist (fnn (Syss a b))
+fnc prop = fncAux (fnn prop)
 
 
-dist :: Prop -> Prop
-dist (Or (And b c) a) = And (dist (Or b a)) (dist (Or c a))
-dist (Or a (And b c)) = And (dist (Or a b)) (dist (Or a c))
-dist (And a b) = And (dist a) (dist b)
-dist (Or a b) = Or (dist a) (dist b)
-dist p = p
+fncAux :: Prop -> Prop
+fncAux (Cons True) = Cons True
+fncAux (Cons False) = Cons False
+fncAux (Var a) = Var a
+fncAux (Not a) = Not a
+fncAux (And a b) = And (fncAux a) (fncAux b)
+fncAux (Or a b) = dist (fncAux a) (fncAux b)
+
+dist :: Prop -> Prop -> Prop
+dist (And a b) c =  And (dist a c) (dist b c)
+dist a (And b c) = And (dist a b) (dist a c)
+dist a b = Or a b
+
 
 {-
 RESOLUCION BINARIA
@@ -84,24 +86,31 @@ clausulas (Cons True) = [[Cons True]]
 clausulas (Cons False) = [[Cons False]]
 clausulas (Var a) = [[Var a]]
 clausulas (Not a) = [[Not a]]
-clausulas (Or a b) = [a:[b]]
+clausulas (Or a b) = unionInt (clausulas a) (clausulas b)
 clausulas (And a b) = union (clausulas a) (clausulas b)
 clausulas _ = [[]]
+
+unionInt :: Eq a =>[[a]] -> [[a]] -> [[a]]
+unionInt [x] [y] = [union x y]
 
 union :: Eq a => [a] -> [a] -> [a]
 union ys [] = ys
 union ys (x:xs)
-    | elem x ys = union ys xs
+    | elemento x ys = union ys xs
     | otherwise      = union (ys ++ [x]) xs
+
+elemento :: Eq a => a -> [a] -> Bool
+elemento _ [] = False
+elemento x (y:ys) = x == y || elemento x ys
 
 
 --Ejercicio 2
 resolucion :: Clausula -> Clausula -> Clausula
-resolucion [] _ = []
+resolucion [] x = x
 resolucion (x:xs) (y:ys) =
     let r = res x (y:ys)
-    in if null r
-        then x : resolucion xs (y:ys)
+    in if r == []
+        then union [x]  (resolucion xs (y:ys))
         else r
 
 res :: Literal -> Clausula -> Clausula
