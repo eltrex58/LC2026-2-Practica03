@@ -43,6 +43,7 @@ fnn (Syss a b) = And (fnn (Impl a b)) (fnn (Impl b a))
 fnn (Or a b) = Or (fnn a) (fnn b)
 fnn (And a b) = And (fnn a) (fnn b)
 
+-- Aplica la negación a una prop
 negar :: Prop -> Prop
 negar (Cons True) = Cons False
 negar (Cons False) = Cons True
@@ -57,7 +58,7 @@ negar (Syss a b) = negar (And (Impl a b) (Impl b a))
 fnc :: Prop -> Prop
 fnc prop = fncAux (fnn prop)
 
-
+-- Hace todo lo que haria fnc
 fncAux :: Prop -> Prop
 fncAux (Cons True) = Cons True
 fncAux (Cons False) = Cons False
@@ -66,6 +67,7 @@ fncAux (Not a) = Not a
 fncAux (And a b) = And (fncAux a) (fncAux b)
 fncAux (Or a b) = dist (fncAux a) (fncAux b)
 
+-- Distribuye propiamente los OR
 dist :: Prop -> Prop -> Prop
 dist (And a b) c =  And (dist a c) (dist b c)
 dist a (And b c) = And (dist a b) (dist a c)
@@ -81,6 +83,7 @@ type Literal = Prop
 type Clausula = [Literal]
 
 --Ejercicio 1
+--NOTA: Quita clausulas repetidas
 clausulas :: Prop -> [Clausula]
 clausulas (Cons True) = [[Cons True]]
 clausulas (Cons False) = [[Cons False]]
@@ -90,34 +93,39 @@ clausulas (Or a b) = unionInt (clausulas a) (clausulas b)
 clausulas (And a b) = union (clausulas a) (clausulas b)
 clausulas _ = [[]]
 
+-- Une las listas internas de dos listas de listas, generando un conjunto interno.
 unionInt :: Eq a =>[[a]] -> [[a]] -> [[a]]
 unionInt [x] [y] = [union x y]
 
+-- Une dos listas de elementos y genera un conjunto.
 union :: Eq a => [a] -> [a] -> [a]
 union ys [] = ys
 union ys (x:xs)
     | elemento x ys = union ys xs
     | otherwise      = union (ys ++ [x]) xs
 
+-- Funcion que verifica si un elemento pertenece a una lista.
 elemento :: Eq a => a -> [a] -> Bool
 elemento _ [] = False
 elemento x (y:ys) = x == y || elemento x ys
 
 
 --Ejercicio 2
+-- Devuelve la unión de las dos clausulas si no es posible.
 resolucion :: Clausula -> Clausula -> Clausula
 resolucion [] x = x
 resolucion (x:xs) (y:ys) =
     let r = res x (y:ys)
-    in if r == []
+    in if r == y:ys
         then union [x]  (resolucion xs (y:ys))
-        else r
+        else r ++ xs
 
+-- Hace una resolucion binaria de una literal con una clausula. Devuelve la clausula entera si no es posible.
 res :: Literal -> Clausula -> Clausula
 res _ [] = []
 res x (y:ys)
     | x == negar y = ys
-    | otherwise = res x ys
+    | otherwise = y : res x ys
 
 
 
@@ -139,7 +147,7 @@ hayResolvente :: Clausula -> Clausula -> Bool
 hayResolvente [] _ = False
 hayResolvente (x:xs) (y:ys) =
     let r = res x (y:ys)
-    in (not (null r) || hayResolvente xs (y:ys))
+    in (not (r ==  (y:ys))) || hayResolvente xs (y:ys)
 
 --Ejercicio 2
 --Funcion principal que pasa la formula proposicional a fnc e invoca a res con las clausulas de la formula.
