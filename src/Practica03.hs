@@ -69,10 +69,9 @@ fncAux (Or a b) = dist (fncAux a) (fncAux b)
 
 -- Distribuye propiamente los OR
 dist :: Prop -> Prop -> Prop
-dist (And a b) c =  And (dist a c) (dist b c)
+dist (And a b) c = And (dist a c) (dist b c)
 dist a (And b c) = And (dist a b) (dist a c)
 dist a b = Or a b
-
 
 {-
 RESOLUCION BINARIA
@@ -149,7 +148,48 @@ hayResolvente (x:xs) (y:ys) =
     let r = res x (y:ys)
     in (not (r ==  (y:ys))) || hayResolvente xs (y:ys)
 
---Ejercicio 2
+---------------------------- Ejercicio 2 --------------------------------
+
 --Funcion principal que pasa la formula proposicional a fnc e invoca a res con las clausulas de la formula.
 saturacion :: Prop -> Bool
-saturacion = undefined
+saturacion f = notB (saturacionAux 100 (clausulas (fnc f))) --negamos pues se quiere sabes si la función es satisfacible y lo que nos da el algoritmo es si es insatisfacible.
+{-saturacion f = 
+    let s = clausulas (fnc f)
+    in  saturacionCiclo 50000 s -}
+
+-- Función not
+notB :: Bool -> Bool
+notB True = False
+notB False = True
+
+-- Checa los casos del algorimo de saturacion, devuelve si la la prop es insatisfacible o no
+saturacionAux :: Int -> [Clausula] -> Bool
+saturacionAux 0 _ = error "se acabaron los recursos xd"  -- termina cuando llega a 0, esto representa como los recursos
+saturacionAux n s
+    | contieneVacia s = True   -- caso 1: [] ∈ Resn(S) 
+    | sNext == s      = False  -- caso 2: Resn-1 = Resn(S), notese que acá se construye fR s = Res(n)
+    | otherwise       = saturacionAux (n-1) sNext 
+    where sNext = fR s
+
+-- Verifica si la cláusula vacía [] está presente
+contieneVacia :: [Clausula] -> Bool
+contieneVacia s = elemento [] s
+
+-- Función R: Calcula la unión de S con todos sus resolventes
+fR :: [Clausula] -> [Clausula]
+fR s = union s (resolventes s)
+
+-- Genera todos los resolventes posibles entre pares de cláusulas
+resolventes :: [Clausula] -> [Clausula]
+resolventes [] = []
+resolventes (c:cs) = union (resolventeAux c cs) (resolventes cs)
+
+-- Genera los resolventes de una cláusula contra una lista
+resolventeAux :: Clausula -> [Clausula] -> [Clausula]
+resolventeAux _ [] = []
+resolventeAux c (x:xs) = 
+    if hayResolvente c x 
+    then union [resolucion c x] (resolventeAux c xs)
+    else resolventeAux c xs
+
+

@@ -22,15 +22,15 @@ En este caso particular es posible que también necesiten ejecutar `ghc-pkg list
 
 ## Integrantes
 
-En esta sección deben eliminar esta línea de texto, borrar la leyenda "Integrante n" y escribir su nombre empezando por apellidos y su número de cuenta.
-
-+ Integrante 1
-    - No. de Cuenta: 
-+ Integrante 2
-    - No. de Cuenta: 
-+ Integrante 3
-    - No. de Cuenta: 
-
+Vazquez Merino Lenin Quetzal
+    - No. de Cuenta: 425106914 
++ Islas Garcia Fernando
+    - No. de Cuenta: 32229531 
 ## Comentarios
 
-Recuerden que opcionalmente pueden agregar un comentario (ver los lineamientos de entrega). Si es el caso, borren esta línea y dejen su comentario.
+En el caso de las pruebas unitarias no el Tt que no pasa se debe a que se elmiminan las repeticiones al pasar de la proposicion a la lista d clausuras, sin embargo, preferí dejarlo así ya que para el algoritmo de saturacion no me tengo que preocupar de las repeticiones, incluso creo yo que es más eficiente de esta manera,
+Para el primer error la verdad quien sabe que pasa, pero según las definiciones para pasar a FNC esta bien definida tanto en la funcion principal tanto como en la axiliar. 
+
+Cómo dato esxtra, estaba viendo que támbien es posible realizar el algoritmo de saturacion usando el teorema de refutación, de manera que para saber si es satisfacible o no ya no es necesario negar el resultado final, sino que simplemente se niega la lisa de clausulas(esto suna raro, pero ps solo se niega cada elemento). Para concluir, cabe aclarar que esta funcion devuelve si la funcion si es satisfacible(por eso la negacion, pues mi algoritmo axiliar devuelve si la funcion es insatisfacible o no), puse el axilar con rspecto a insatisfacible pues pense que eso se queria saber, pero ps era lo contrario.
+
+UNA COSA MÁS, IMPLEMENTAMOS TODAS LAS FUNCIONES AXILIARES NECESARIAS, CUALQUIER DUDA HACERCA DE FUNCIONES DE HASKELL ESPERO QUE NOS LAS PUEDA COMENTAR, PUES ES UNA PENA QUE POR USAR FUNCIONES TAN SENCILLAS SE NOS DESCUENTE PUNTOS(no digo ue eso este mal, de hecho creo que esta bien porque asi aprendemos más), GRACIAS Y BUENA SEMANA SANTA.
